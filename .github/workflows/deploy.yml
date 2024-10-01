@@ -127,6 +127,10 @@ jobs:
         echo "IMAGE_NAME: $IMAGE_NAME"
         echo "Changing SDL to use the new image: ${{ inputs.image }}"
         
+        # Replace env vars in SDL
+        VARS=$(sed -n 's/.*{{\s*\([A-Za-z_][A-Za-z0-9_]*\)\s*}}.*/\1/p' ${{ inputs.PROJECT_PATH }}/${SDL} | sort | uniq | sed 's/[^ ]* */$&/g' | tr '\n' ' '
+        sed 's/{{\([A-Za-z_][A-Za-z0-9_]*\)}}/\$\1/g' ${{ inputs.PROJECT_PATH }}/${SDL} | envsubst "$VARS" > ${{ inputs.PROJECT_PATH }}/${SDL}
+        
         # Change the image IMAGE_NAME version from the SDL file
         sed -i "s|image: $IMAGE_NAME:.*|image: ${{ inputs.image }}|g" ${{ inputs.PROJECT_PATH }}/${SDL}
 
